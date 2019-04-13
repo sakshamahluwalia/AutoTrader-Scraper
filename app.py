@@ -6,7 +6,7 @@ driver = webdriver.Firefox(executable_path=r'./driver/geckodriver')
 count = 0
 
 lst = []
-while (count != 200):
+while (count != 500):
 
 	driver.get('https://www.autotrader.ca/cars/?rcp=100&rcs={}'.format(count)) # update rcs by 100 each time
 	cars = driver.find_elements(By.CLASS_NAME, "result-item-inner")
