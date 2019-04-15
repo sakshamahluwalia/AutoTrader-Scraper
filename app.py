@@ -27,42 +27,6 @@ while (count != 500):
 
 print(len(lst))
 
-
-    
-
-
-
-# from bs4 import BeautifulSoup
-# import requests, pandas, os
-
-
-# print ("Welcome to smartRealtor!")
-# # budget = str(input("Please provide max price."+os.linesep))
-# # maxBedRooms = str(input("Please specify the minimum number of Bedrooms."+os.linesep))
-# # minBathRooms = str(input("Please specify the minimum number of Bathrooms."+os.linesep))
-# # city = str(input("Please provide a city."+os.linesep))
-
-# driver = webdriver.Firefox(executable_path=r'./driver/geckodriver')
-# driver.get('https://www.autotrader.ca')
-# content = req.content
-# print(content)
-
-# soup = BeautifulSoup(content, "html.parser")
-# listings = soup.find_all("div", {"class": ["result-item-inner"]}) #all the listings
-
-# print(len(listings))
-
-# print ("Gathering Data! Please wait.")
-# if soup.find("ol", {"class": "pagination"}):
-# 	if soup.find("ol", {"class": "pagination"}).findChildren() != None:
-# 	    pages = soup.find("ol", {"class": "pagination"}).findChildren()
-
-# 	for i in range(2, int(pages[-3].text) + 1):
-# 	    req = requests.get("https://www.century21.ca/search/PropType-RES/0-700000/Beds-3/Baths-2/Q-brampton/page" + str(i))    
-# 	    content = req.content
-# 	    soup = BeautifulSoup(content, "html.parser")
-# 	    listings += soup.find_all("span", {"class": ["mls-id", "property-id"]})
-
 # print ("Please check the src folder for 'Possibilities.csv'.")
 # new_lst = pandas.DataFrame(lst)
 # new_lst.to_csv("Possibles.csv")
