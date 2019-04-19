@@ -16,7 +16,7 @@ A computer with python and pip installed.
 Open the terminal in the cloned folder. 
 ```
 . install.sh
-python3 index.py
+python index.py
 ```
 The first command will install the dependencies required for the script to run and the second will create a csv file called, "Possibles.csv".
 
