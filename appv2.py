@@ -31,18 +31,14 @@ def parse(url, count):
     """
     driver.execute_script("window.open('{}',);".format(url))
 
-    # print("current_url: {}, url: {}, => {}, {}".format(driver.current_url, url, driver.window_handles[count], count))
     lock.acquire()
+
     driver.switch_to.window(driver.window_handles[count])
 
     html = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'SearchListings')))
     
-    # print(html.get_attribute("outerHTML"))
-
-    # print("\n\n current_url: {}, \n url: {} \n\n".format(driver.current_url, url))
     html = driver.find_element_by_id("SearchListings").get_attribute("outerHTML")
-    # cars = driver.find_elements(By.CLASS_NAME, "result-item-inner")
-    # print("{} {}".format(len(cars), count))
+
     lock.release()
 
     soup = BeautifulSoup(html, "html.parser")
@@ -78,9 +74,6 @@ def parse(url, count):
 
 
         info["Car"] = title
-	
-        # if (info["Car"] != None):
-        #     info["year"] = title[:4]
 
         info["Mileage"] = mileage
         
