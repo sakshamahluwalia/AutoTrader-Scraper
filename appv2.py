@@ -1,10 +1,10 @@
 import pandas
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from threading import Thread, Lock
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 
 lock = Lock()
 # precondition: firefox needs to be installed and a path to its binary should be specified.
@@ -12,13 +12,15 @@ lock = Lock()
 # get the binary for firsfox browser.
 driver = webdriver.Firefox(executable_path=r'./driver/geckodriver')
 # open any page
-driver.get("http://www.google.com/")
+driver.get("https://wwwa.autotrader.ca/cars/on/brampton/?rcp=100&rcs=0&srt=3&pRng=%2C5000&oRng=%2C150000&prx=250&prv=Ontario&loc=L6V%202S1&hprc=True&wcp=True&sts=New-Used&inMarket=advancedSearch")
 
 # get all the urls that you want to scrape and add them in an array.
 urls = []
-for count in range(0, 500, 100):
-    urls.append('https://www.autotrader.ca/cars/?rcp=100&rcs={}&pRng=5000%2C8000&oRng=%2C150000&prx=-1&loc=L6V2S1&trans=Manual&hprc=True&wcp=True'.format(count))
 
+
+last_page = int(str(driver.find_elements(By.CLASS_NAME, "last-page, page-item")[0].get_attribute("data-page"))) * 100
+for count in range(0, last_page, 100):
+    urls.append('https://wwwa.autotrader.ca/cars/on/brampton/?rcp=100&rcs={}&srt=3&pRng=%2C5000&oRng=%2C150000&prx=250&prv=Ontario&loc=L6V%202S1&hprc=True&wcp=True&sts=New-Used&inMarket=advancedSearch'.format(count))
 
 
 lst = []
@@ -43,23 +45,54 @@ def parse(url, count):
     # print("{} {}".format(len(cars), count))
     lock.release()
 
-    # for car in cars:
-    #     info = {}
-    #     info["Car"] = car.find_elements(By.CLASS_NAME, "result-title")[0].text
+    soup = BeautifulSoup(html, "html.parser")
+    cars = soup.find_all("div", {"class": "result-item-inner"})
+
+    for car in cars:
+        info = {}
+        inner_ = BeautifulSoup(str(car), "html.parser")
+
+        try:
+            title = (inner_.find("h2").text).encode('ascii', 'ignore').decode('ascii')
+        except Exception as e:
+            title = "N/A"
+            print("DEBUG \n{}\n title error: {}".format(e, url))
+
+        try:
+            price = str(inner_.find("span", {"class": "price-amount"}).text)[1:].replace(",", "")
+        except Exception as e:
+            price = "N/A"
+            print("DEBUG \n{}\n price error: {}".format(e, url))
+
+        try:
+            mileage = str(inner_.find("div", {"class": "kms"}).text).split(" ")[1].replace(",", "")
+        except Exception as e:
+            mileage = "N/A"
+            print("DEBUG \n{}\n mileage error: {}".format(e, url))
+
+        try:
+            link_ = str(inner_.find("a", {"class": ["result-title", "click"]}, href=True)['href'])
+        except Exception as e:
+            link_ = "N/A"
+            print("DEBUG \n{}\n link_ error: {}".format(e, url))
+
+
+        info["Car"] = title
 	
-    #     # if (info["Car"] != None):
-    #         # info["year"] = str(car.find_elements(By.CLASS_NAME, "result-title")[0].text)[:4]
-    #     if (car.find_elements(By.CLASS_NAME, "kms") != []):
-    #         if (str(car.find_elements(By.CLASS_NAME, "kms")[0].text) != ""):
-    #             info["Mileage"] = str(car.find_elements(By.CLASS_NAME, "kms")[0].text)[len("Mileage "):-3]
-    #     if (car.find_elements(By.CLASS_NAME, "price-amount") != []):
-    #         if (str(car.find_elements(By.CLASS_NAME, "price-amount")[0].text) != ""):
-    #             info["price"] = str(car.find_elements(By.CLASS_NAME, "price-amount")[0].text)
+        # if (info["Car"] != None):
+        #     info["year"] = title[:4]
 
-    #     info["link"] = str(car.find_elements(By.CLASS_NAME, "result-title, click")[0].get_attribute("href"))
+        info["Mileage"] = mileage
+        
+        info["price"] = price
 
-    #     lst.append(info)
-    # driver.quit()
+        if (link_ != "N/A"):
+            info["link"] = "https://wwwa.autotrader.ca" + link_
+        else:
+            info["link"] = link_
+
+        lst.append(info)
+
 
 # create a thread for each url you want to scrape.
 threadlist = []
@@ -74,10 +107,11 @@ if __name__ == '__main__':
     for thread_ in threadlist:
         thread_.join()
 
+    # print(urls)
     # print(len(urls))
     print(len(lst))
     driver.quit()
 
-# print ("Please check the src folder for 'Possibilities.csv'.")
-# new_lst = pandas.DataFrame(lst)
-# new_lst.to_csv("Possibles.csv")
+print ("Please check the src folder for 'Possibilities.csv'.")
+new_lst = pandas.DataFrame(lst)
+new_lst.to_csv("Possibles.csv")
